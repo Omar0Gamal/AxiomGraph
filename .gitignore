@@ -1,0 +1,85 @@
+# ==============================================================================
+# CMake & C++ Build Artifacts
+# ==============================================================================
+build/
+out/
+bin/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+*.cmake
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# Ninja Build Files
+build.ninja
+.ninja_deps
+.ninja_log
+
+# Compiled Object Files & Libraries
+*.o
+*.obj
+*.a
+*.lib
+*.dll
+*.dylib
+*.exe
+*.out
+
+# ==============================================================================
+# Python & scikit-build-core
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Compiled Python Extensions (nanobind)
+*.so
+*.pyd
+
+# Virtual Environments
+.venv/
+venv/
+env/
+.env/
+
+# Packaging & Distribution
+_skbuild/
+dist/
+sdist/
+wheels/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# ==============================================================================
+# IDEs & Editor Configurations
+# ==============================================================================
+# VS Code (Optional: remove if you want to commit shared workspace settings)
+.vscode/
+
+# Visual Studio
+.vs/
+
+# JetBrains / CLion
+.idea/
+cmake-build-*/
+
+# Neovim / Vim
+*.swp
+*.swo
+*~
+Session.vim
+
+# ==============================================================================
+# OS Generated Files
+# ==============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

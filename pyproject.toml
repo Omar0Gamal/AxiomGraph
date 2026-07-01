@@ -1,0 +1,17 @@
+[build-system]
+requires = ["scikit-build-core>=0.4.3", "nanobind>=1.9.2"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "axiomgraph"
+version = "0.1.0"
+description = "Hybrid Graph-Vector Database for AI Agents"
+requires-python = ">=3.8"
+dependencies = [
+    "numpy",
+]
+
+[tool.scikit-build]
+cmake.build-type = "Release"
+build.verbose = true
+sdist.exclude = ["build", "tests", "examples"]

@@ -17,8 +17,6 @@ jobs:
             variant: gpu
           - os: windows-2022
             variant: cpu
-          - os: windows-2022
-            variant: gpu
           - os: macos-latest
             variant: cpu
 
@@ -27,20 +25,20 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install CUDA Toolkit (Windows GPU)
-        if: runner.os == 'Windows' && matrix.variant == 'gpu'
-        uses: Jimver/cuda-toolkit@v0.2.19
-        with:
-          cuda: '12.6.0'
-
       - name: Setup MSVC
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
 
+      - name: Configure Linux GPU variant
+        if: matrix.variant == 'gpu'
+        run: |
+          sed -i 's/name = "axiomgraph"/name = "axiomgraph-gpu"/' pyproject.toml
+          sed -i 's/requires = \[/requires = ["libcuvs-cu12", "libraft-cu12", "cmake>=3.30.4", /' pyproject.toml
+        shell: bash
+
       - name: Configure CPU variant
         if: matrix.variant == 'cpu'
         run: |
-          python -c "import re; data=open('pyproject.toml').read(); open('pyproject.toml', 'w').write(re.sub(r'name = \"axiomgraph\"', 'name = \"axiomgraph-cpu\"', data))"
           echo "CIBW_ENVIRONMENT=SKBUILD_CMAKE_ARGS='-DENABLE_CUDA=OFF'" >> $GITHUB_ENV
         shell: bash
 

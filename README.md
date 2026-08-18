@@ -18,19 +18,19 @@ AxiomGraph is a hybrid graph-vector database engineered for GraphRAG workloads a
 ### Python SDK
 
 We publish two variants of the pre-compiled wheels on our [GitHub Releases](https://github.com/Omar0Gamal/AxiomGraph/releases) page:
-*   **`axiomgraph`**: Full GPU acceleration via CUDA and RAPIDS (`cuVS`). Large wheel size.
-*   **`axiomgraph-cpu`**: CPU-only fallback using HNSW. Lightweight wheel size (~650 KB).
+*   **`axiomgraph`**: CPU-only fallback using HNSW. Lightweight wheel size (~960 KB). Works natively on Windows, Linux, and macOS.
+*   **`axiomgraph-gpu`**: Full GPU acceleration via CUDA and RAPIDS (`cuVS`). Large wheel size. Available for Linux only.
 
 1. Navigate to the [Releases](https://github.com/Omar0Gamal/AxiomGraph/releases) page.
 2. Download the `.whl` file matching your OS, Python version, and preferred variant.
 3. Install directly via URL:
 
 ```bash
-# GPU version for Linux (Python 3.10)
-pip install https://github.com/Omar0Gamal/AxiomGraph/releases/download/v0.1.0/axiomgraph-0.1.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+# CPU-only version (Python 3.10)
+pip install https://github.com/Omar0Gamal/AxiomGraph/releases/download/v0.1.1/axiomgraph-0.1.1-cp310-cp310-manylinux_2_28_x86_64.whl
 
-# CPU-only version for Linux (Python 3.10)
-pip install https://github.com/Omar0Gamal/AxiomGraph/releases/download/v0.1.0/axiomgraph_cpu-0.1.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+# GPU version for Linux (Python 3.10)
+pip install https://github.com/Omar0Gamal/AxiomGraph/releases/download/v0.1.1/axiomgraph_gpu-0.1.1-cp310-cp310-manylinux_2_28_x86_64.whl
 ```
 
 #### Building from Source

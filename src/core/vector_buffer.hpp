@@ -3,8 +3,11 @@
 #include <vector>
 #include <shared_mutex>
 #include <string>
+#ifdef USE_CUDA
 #include <cuda_runtime.h>
+#endif
 #include <stdexcept>
+#include <cstdlib>
 
 namespace axiomgraph {
 
@@ -16,15 +19,24 @@ struct CudaPinnedAllocator {
     
     T* allocate(std::size_t n) {
         T* ptr = nullptr;
+#ifdef USE_CUDA
         // Allocate page-locked memory accessible to the device (zero-copy)
         if (cudaHostAlloc((void**)&ptr, n * sizeof(T), cudaHostAllocMapped) != cudaSuccess) {
             throw std::bad_alloc();
         }
+#else
+        ptr = static_cast<T*>(std::malloc(n * sizeof(T)));
+        if (!ptr) throw std::bad_alloc();
+#endif
         return ptr;
     }
     
     void deallocate(T* p, std::size_t n) noexcept {
+#ifdef USE_CUDA
         cudaFreeHost(p);
+#else
+        std::free(p);
+#endif
     }
 };
 

@@ -1,0 +1,41 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test_cpu:
+    name: Build & Test (CPU) on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Configure CPU variant
+        run: |
+          python -c "import re; data=open('pyproject.toml').read(); open('pyproject.toml', 'w').write(re.sub(r'name = \"axiomgraph\"', 'name = \"axiomgraph-cpu\"', data))"
+        shell: bash
+
+      - name: Install build dependencies
+        run: pip install build pytest
+
+      - name: Build wheel
+        env:
+          SKBUILD_CMAKE_ARGS: '-DENABLE_CUDA=OFF'
+        run: python -m build --wheel
+
+      - name: Install wheel
+        run: pip install dist/*.whl
+
+      - name: Run end-to-end test
+        # Run from outside the source directory to avoid import conflicts
+        run: |
+          cd /tmp
+          python $GITHUB_WORKSPACE/tests/test_end_to_end.py

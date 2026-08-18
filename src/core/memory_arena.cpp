@@ -4,7 +4,7 @@
 
 namespace axiomgraph {
 
-MemoryArena::MemoryArena() : next_id_(0), active_nodes_(0), lock_(ATOMIC_FLAG_INIT) {}
+MemoryArena::MemoryArena() : next_id_(0), active_nodes_(0) {}
 
 class SpinLockGuard {
     std::atomic_flag& flag_;

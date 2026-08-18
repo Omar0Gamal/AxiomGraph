@@ -4,7 +4,6 @@ import numpy as np
 from typing import Optional
 import threading
 
-# Graceful import of the C++ backend
 try:
     from . import ext
 except ImportError as e:
@@ -20,7 +19,7 @@ class HotMemoryManager:
     """
     def __init__(self, memory: 'Memory'):
         self._memory = memory
-        self._nodes = {}  # NodeID -> Node mapping
+        self._nodes = {}
 
     def add_node(self, vector: np.ndarray, label: str, type_: str, properties: Optional[dict] = None) -> int:
         """Adds a new entity to the working memory graph."""
@@ -77,7 +76,6 @@ class Memory:
         self.path = path
         self.dimensions = dimensions
         
-        # GPU capability check & graceful fallback
         self.use_gpu = use_gpu
         if self.use_gpu:
             try:
@@ -89,7 +87,6 @@ class Memory:
         else:
             self._index = ext.CPUIndex()
 
-        # C++ Engine Core Initialization
         self._arena = ext.MemoryArena()
         self._vectors = ext.VectorBuffer(dimensions)
         self._hot_graph = ext.HotGraph()
@@ -97,12 +94,10 @@ class Memory:
         
         self._lock = threading.RLock()
             
-        # Metadata storage (Python-side for dynamic schemaless JSON)
         self._edge_meta = []
         
         self.hot = HotMemoryManager(self)
         
-        # Attempt to load state if exists
         if os.path.exists(f"{self.path}.vectors"):
             self.load()
 
@@ -148,26 +143,22 @@ class Memory:
                     if match:
                         allowed_ids.append(nid)
                 if not allowed_ids:
-                    return GraphContext() # No matches
+                    return GraphContext()
             else:
                 allowed_ids = list(self.hot._nodes.keys())
                 
-            # 1. Semantic Vector Search
             if self.use_gpu:
                 initial_ids = self._index.search(vector, top_k, allowed_ids)
             else:
                 initial_ids = self._index.search(self._vectors, vector, top_k, allowed_ids)
                 
-            # 2. Graph Traversal (BFS)
             context_nodes = set(initial_ids)
             frontier = list(initial_ids)
             
             for _ in range(depth):
                 next_frontier = []
                 for node_id in frontier:
-                    # Get cold memory neighbors
                     neighbors = self._csr_graph.get_neighbors(node_id)
-                    # Get hot memory neighbors
                     if search_hot:
                         hot_edges = self._hot_graph.get_neighbors(node_id)
                         neighbors.extend([e.target for e in hot_edges])
@@ -178,7 +169,6 @@ class Memory:
                             next_frontier.append(nbr)
                 frontier = next_frontier
                 
-            # 3. Reconstruct Context
             nodes = [self.hot._nodes[nid] for nid in context_nodes if nid in self.hot._nodes]
             edges = [e for e in self._edge_meta if e.source_id in context_nodes and e.target_id in context_nodes]
             
@@ -207,12 +197,17 @@ class Memory:
             with open(tmp_meta, "w") as f:
                 json.dump(meta, f)
                 
-            # Atomic replace
             os.replace(tmp_vec, f"{self.path}.vectors")
             os.replace(tmp_hot, f"{self.path}.hot")
             os.replace(tmp_csr, f"{self.path}.csr")
-            os.replace(tmp_idx, f"{self.path}.index")
             os.replace(tmp_meta, f"{self.path}.meta.json")
+            
+            if os.path.exists(tmp_idx):
+                os.replace(tmp_idx, f"{self.path}.index")
+            if os.path.exists(tmp_idx + ".meta"):
+                os.replace(tmp_idx + ".meta", f"{self.path}.index.meta")
+            if os.path.exists(tmp_idx + ".hnsw"):
+                os.replace(tmp_idx + ".hnsw", f"{self.path}.index.hnsw")
 
     def load(self):
         """Loads memory state from disk."""
@@ -223,7 +218,7 @@ class Memory:
             try:
                 self._index.load(f"{self.path}.index")
             except Exception:
-                pass # Index might not exist yet
+                pass
                 
             if os.path.exists(f"{self.path}.meta.json"):
                 with open(f"{self.path}.meta.json", "r") as f:
